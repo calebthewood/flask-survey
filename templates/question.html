@@ -3,7 +3,7 @@
 
   <h1>{{ question.question }}</h1>
 
-  <form action="/answer" method="POST">
+  <form action="/questions/{{ id }}" method="POST">
 
     {%for choice in choices%}
       <!-- you should have one item like this for every choice -->
@@ -11,10 +11,10 @@
         <input
             type="radio"
             name="answer"
-            value= "{{ choice }}">
+            value="{{ choice }}">
         {{ choice }}
       </p>
-    {%endfor%}  
+    {%endfor%}
     <button>Continue</button>
   </form>
 
