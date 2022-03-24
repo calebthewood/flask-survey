@@ -19,6 +19,7 @@ def get_start():
 
 @app.post("/begin")
 def start_survey():
+    session["responses"] = [] #make responses a global constant so you only need to reassign once
     """ redirects you to the questions once button is clicked """
     return redirect("/questions/0")
 
@@ -26,30 +27,45 @@ def start_survey():
 def get_questions(question_id):
     """ show the question page """
 
+    response_len = len(session["responses"])    
+
+    if question_id != len(session["responses"]):
+        flash("QUESTIONS MUST BE ANSWERED IN ORDER!!")
+        return redirect(f"/questions/{response_len}")
+
+    elif len(session["responses"]) == len(survey.questions):
+        return redirect("/completion")
+
     question = survey.questions[question_id]
     choices=survey.questions[question_id].choices
 
     return render_template(
-        "question.html",
-        choices=choices,
-        question=question,
-        id=question_id)
+    "question.html",
+    choices=choices,
+    question=question,
+    id=question_id)
+
+   
 
 @app.post("/questions/<int:question_id>")
 def redirect_nextquestion(question_id):
+    """" docstring here """
 
-    session[f"question{q_id}"] = request.form.answer
-    q_id = question_id + 1
+    session[f"question{question_id}"] = request.form.get("answer")
+    question_id += 1
 
-    if q_id < len(survey.questions):
-        return redirect(f"/questions/{q_id}")
-    else:
-        return redirect("/completion")
+    responses = session["responses"]
+    responses.append(request.form["answer"])
+    session["responses"] = responses
+
+    if question_id < len(survey.questions):
+        return redirect(f"/questions/{question_id}")
+
+    return redirect("/completion")
 
 @app.get("/completion")
 def get_completion():
     """""Renders Completion page after survey is completed"""""
-
 
     return render_template("completion.html")
 
